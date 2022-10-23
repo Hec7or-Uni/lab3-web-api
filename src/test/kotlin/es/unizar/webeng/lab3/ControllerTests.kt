@@ -3,6 +3,7 @@ package es.unizar.webeng.lab3
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -85,6 +86,16 @@ class ControllerTests {
     fun `GET is safe and idempotent`() {
 
         // SETUP
+        every {
+            employeeRepository.findById(1)
+        } answers {
+            Optional.of(Employee("Mary", "Manager", 1))
+        }
+        every {
+            employeeRepository.findById(2)
+        } answers {
+            Optional.empty()
+        }
 
         mvc.get("/employees/1").andExpect {
             status { isOk() }
@@ -107,7 +118,13 @@ class ControllerTests {
         }
 
         // VERIFY
-
+        verify(exactly = 0) {
+            employeeRepository.save(any())
+            employeeRepository.deleteById(any())
+        }
+        verify(exactly = 2) {
+            employeeRepository.findById(1)
+        }
     }
 
     @Test
