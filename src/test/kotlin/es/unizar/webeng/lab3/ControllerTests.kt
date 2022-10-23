@@ -131,6 +131,20 @@ class ControllerTests {
     fun `PUT is idempotent but not safe`() {
 
         // SETUP
+        val employee = slot<Employee>()
+        every {
+            employeeRepository.save(capture(employee))
+        } answers {
+            employee.captured
+        }
+
+        every {
+            employeeRepository.findById(1)
+        } answers {
+            Optional.empty()
+        } andThenAnswer {
+            Optional.of(Employee("Tom", "Manage", 1))
+        }
 
         mvc.put("/employees/1") {
             contentType = MediaType.APPLICATION_JSON
@@ -159,7 +173,9 @@ class ControllerTests {
         }
 
         // VERIFY
-
+        verify(exactly = 2) {
+            employeeRepository.save(Employee("Tom", "Manager", 1))
+        }
     }
 
     @Test
