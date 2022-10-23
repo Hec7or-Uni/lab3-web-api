@@ -51,6 +51,20 @@ class ControllerTests {
     fun `POST is not safe and not idempotent`() {
 
         // SETUP
+        val employee = slot<Employee>()
+        every {
+            employeeRepository.save(capture(employee))
+        } answers {
+            employee.captured
+        }
+
+        every {
+            employeeRepository.save(capture(employee))
+        } answers {
+            employee.captured.copy(id = 1)
+        } andThenAnswer {
+            employee.captured.copy(id = 2)
+        }
 
         mvc.post("/employees") {
             contentType = MediaType.APPLICATION_JSON
@@ -79,7 +93,9 @@ class ControllerTests {
         }
 
         // VERIFY
-
+        verify(exactly = 2) {
+            employeeRepository.save(Employee("Mary", "Manager"))
+        }
     }
 
     @Test
