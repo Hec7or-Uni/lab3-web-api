@@ -1,6 +1,9 @@
 package es.unizar.webeng.lab3
 
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -12,6 +15,7 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
+import java.util.*
 
 private val MANAGER_REQUEST_BODY = { name: String ->
     """
@@ -145,6 +149,17 @@ class ControllerTests {
     fun `DELETE is idempotent but not safe`() {
 
         // SETUP
+        justRun {
+            employeeRepository.deleteById(1)
+        }
+
+        every {
+            employeeRepository.findById(1)
+        } answers {
+            Optional.of(Employee("Tom", "Manager", 1))
+        } andThenAnswer {
+            Optional.empty()
+        }
 
         mvc.delete("/employees/1").andExpect {
             status { isNoContent() }
@@ -155,6 +170,8 @@ class ControllerTests {
         }
 
         // VERIFY
-
+        verify(exactly = 1) {
+            employeeRepository.deleteById(1)
+        }
     }
 }
