@@ -25,6 +25,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.auth0:java-jwt:4.2.1")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.springframework.boot:spring-boot-devtools")
@@ -38,6 +39,7 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:3.1.1")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:*")
 }
 
 tasks.withType<KotlinCompile> {
